@@ -1,8 +1,9 @@
 #include <iostream>
 #include "./read_csv.cpp"
+#include "./euclidean_distance.cpp"
 using namespace std;
 
-int main () {
+void read_csv_test () {
   data_map map = readCSV("../datasets/College.csv");
   for (data_map::iterator it = map.begin(); it != map.end(); it++) {
     cout << it->first << ": ";
@@ -11,4 +12,14 @@ int main () {
     }
     cout << endl;
   }
+}
+
+void euclidean_distance_test () {
+  vector<float> a = { 3.5, 2.5, 3, 4, 5, 6};
+  vector<float> b = { 1, 2, 3, 8, 5, 1};
+  cout << euclidean_distance(a, b) << endl;
+}
+
+int main () {
+  euclidean_distance_test();
 }
