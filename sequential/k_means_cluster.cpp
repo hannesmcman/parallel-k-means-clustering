@@ -1,8 +1,9 @@
 #include "../lib/types.cpp"
+#include <cfloat>
 using namespace std;
 
 int find_closest_center(vector<float> item, centroid_vector centroids) {
-  float minDist = FLOAT_MAX;
+  float minDist = FLT_MAX;
   int minIndex = 0;
   for (centroid_vector::iterator it = centroids.begin(); it != centroids.end(); it++) {
     const float dist = euclidean_distance(item, *it);
