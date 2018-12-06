@@ -1,3 +1,6 @@
+#ifndef _HELPERS
+#define _HELPERS
+
 #include <iostream>
 #include "./types.cpp"
 #include <time.h>
@@ -28,3 +31,6 @@ centroid_vector gen_random_centroids(int k, int numFeatures, int max) {
   }
   return centroids;
 }
+
+
+#endif

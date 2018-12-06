@@ -1,15 +1,13 @@
 #include "../lib/types.cpp"
 #include "../lib/euclidean_distance.cpp"
+#include "../lib/helpers.cpp"
 #include <cfloat>
+#include <iostream>
 using namespace std;
 
 centroid_vector init_cluster_centers(int k_length, const data_map &dataset){
-    centroid_vector centroids;
     vector<float> sample_map_data = dataset.begin()->second;
-    for (int i=0; i<k_length; i++){
-        for (int j=0; j<sample_map_data.size(); j++)
-            centroids[i].push_back(rand());
-    }
+    centroid_vector centroids =  gen_random_centroids(k_length, sample_map_data.size(), 1000);
     return centroids;
 }
 
