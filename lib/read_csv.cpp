@@ -5,7 +5,7 @@
 #include "./types.cpp"
 using namespace std;
 
-data_map readCSV(string filename) {
+data_map read_csv(string filename) {
   data_map final_map;
   ifstream inputFile;
   inputFile.open(filename);
