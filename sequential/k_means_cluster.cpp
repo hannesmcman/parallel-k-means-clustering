@@ -11,36 +11,40 @@ centroid_vector init_cluster_centers(int k_length, const data_map &dataset){
     return centroids;
 }
 
-// TODO: change arguments to references
 bool get_mean_centroid(vector<float> &centroid, const vector<string> &cluster, const data_map &dataset){
     bool changed = 0;
     vector<float> sample_map_data = dataset.begin()->second;
     vector<float> ret(sample_map_data.size(), 0.0)
 
-    for (int i=0; i<cluster.size(); i++)
-        vector<float> point_features = dataset[];
-        for (int j=0; j<values.size(); i++)
-            ret[j] += dataset[cluster[]][j];
+    for (vector<string>::iterator it = cluster.begin(); it != cluster.end(); it++) {
+    // for (int i=0; i<cluster.size(); i++)
+        // vector<float> point_features = dataset[cluster[i]];
+        vector<float> point_features = *it;
+        for (int j=0; j<point_features.size(); i++)
+            ret[j] += point_features[j];
     }
 
     int cluster_size = cluster.size();
-    for (i=0; i<cluster_size; i++)
+    for (i=0; i<ret.size(); i++)
         ret[i] /= cluster_size;
 
     if centroid != ret{
         changed = 1;
-        centroid = ret //or something like that
+        for (i=0; i<ret.size(); i++)
+          centroid[i] = ret[i]; 
     }
-
-
     return changed;
 }
 
-bool update_cluster_centers(centroid_vector &centroids, const cluster_vector &clusters, const data_map &dataset){
+bool update_cluster_centers(centroid_vector &centers, const cluster_vector &clusters, const data_map &dataset){
     bool changed = 0;
-    for (int i=0; i<centroids.size(); i++){
-        bool centroid_changed = get_mean_centroid(centroids[i], clusters[i], dataset);
+    for (centroid_vector::iterator it = centers.begin(); it != centers.end(); it++) {
+      int index = it - centers.begin();
+      bool centroid_changed = get_mean_centroid(*it, clusters[i], dataset);
     }
+    // for (int i=0; i<centers.size(); i++){
+    //     bool centroid_changed = get_mean_centroid(centers[i], clusters[i], dataset);
+    // }
     if (centroid_changed){
         changed = 1;
     }
