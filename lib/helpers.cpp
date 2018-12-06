@@ -15,19 +15,31 @@ void print(const vector<T> &vec) {
   cout << endl;
 }
 
-vector<float> gen_random_vector(int size, int max) {
+// vector<float> gen_random_vector(int size, int max) {
+//   vector<float> ret;
+//   for (int i=0; i < size; i++) {
+//     srand(static_cast<unsigned int>(clock()));
+//     ret.push_back((float) (rand() % max));
+//   }
+//   return ret;
+// }
+
+
+vector<float> gen_random_vector(int size, vector<float> min, vector<float> max) {
   vector<float> ret;
-  for (int i=0; i < size; i++) {
-    srand(static_cast<unsigned int>(clock()));
-    ret.push_back((float) (rand() % max));
+    for (int i=0; i < size; i++) {
+      int begin = min[i];
+      int end = max[i];
+      srand(static_cast<unsigned int>(clock()));
+      ret.push_back((float) (rand() % ((end - begin) + 1) + begin));
   }
   return ret;
 }
 
-centroid_vector gen_random_centroids(int k, int numFeatures, int max) {
+centroid_vector gen_random_centroids(int k, int numFeatures, vector<float> min, vector<float> max) {
   centroid_vector centroids;
   for (int i=0; i < k; i++) {
-    centroids.push_back(gen_random_vector(numFeatures, max));
+    centroids.push_back(gen_random_vector(numFeatures, min, max));
   }
   return centroids;
 }

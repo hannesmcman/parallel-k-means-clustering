@@ -6,8 +6,21 @@
 using namespace std;
 
 centroid_vector init_cluster_centers(int k_length, const data_map &dataset){
-    vector<float> sample_map_data = dataset.begin()->second;
-    centroid_vector centroids =  gen_random_centroids(k_length, sample_map_data.size(), 1000);
+    vector<float> sample_map_data = dataset.begin()->second; 
+    int num_features = sample_map_data.size();
+    vector<float> min_map_data = dataset.begin()->second; 
+    vector<float> max_map_data = dataset.begin()->second; 
+    for (data_map::const_iterator it = dataset.begin(); it != dataset.end(); it++) {
+      for (int i=0; i<num_features; i++){
+        if ((it->second)[i]<min_map_data[i]){
+          min_map_data[i] = (it->second)[i];
+        }
+        if ((it->second)[i]>min_map_data[i]){
+          min_map_data[i] = (it->second)[i];
+        }
+      } 
+    }
+    centroid_vector centroids =  gen_random_centroids(k_length, num_features , min_map_data, max_map_data);
     return centroids;
 }
 
