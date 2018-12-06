@@ -2,6 +2,56 @@
 #include <cfloat>
 using namespace std;
 
+centroid_vector init_cluster_centers(int k_length, const data_map &dataset){
+    centroid_vector centroids;
+    vector<float> sample_map_data = dataset.begin()->second;
+    for (int i=0; i<k_length; i++){
+        for (int j=0; j<sample_map_data.size(); j++)
+            centroids[i].push_back(rand());
+    }
+    return centroids;
+}
+
+bool get_mean_centroid(vector<float> &centroid, const vector<string> &cluster, const data_map &dataset){
+    bool changed = 0;
+    vector<float> sample_map_data = dataset.begin()->second;
+    vector<float> ret(sample_map_data.size(), 0.0)
+
+    for (vector<string>::iterator it = cluster.begin(); it != cluster.end(); it++) {
+    // for (int i=0; i<cluster.size(); i++)
+        // vector<float> point_features = dataset[cluster[i]];
+        vector<float> point_features = *it;
+        for (int j=0; j<point_features.size(); i++)
+            ret[j] += point_features[j];
+    }
+
+    int cluster_size = cluster.size();
+    for (i=0; i<ret.size(); i++)
+        ret[i] /= cluster_size;
+
+    if centroid != ret{
+        changed = 1;
+        for (i=0; i<ret.size(); i++)
+          centroid[i] = ret[i]; 
+    }
+    return changed;
+}
+
+bool update_cluster_centers(centroid_vector &centers, const cluster_vector &clusters, const data_map &dataset){
+    bool changed = 0;
+    for (centroid_vector::iterator it = centers.begin(); it != centers.end(); it++) {
+      int index = it - centers.begin();
+      bool centroid_changed = get_mean_centroid(*it, clusters[i], dataset);
+    }
+    // for (int i=0; i<centers.size(); i++){
+    //     bool centroid_changed = get_mean_centroid(centers[i], clusters[i], dataset);
+    // }
+    if (centroid_changed){
+        changed = 1;
+    }
+    return changed;
+}   
+
 int find_closest_center(vector<float> item, centroid_vector centroids) {
   float minDist = FLT_MAX;
   int minIndex = 0;
@@ -32,3 +82,4 @@ cluster_vector find_clusters(int k, data_map data, int max_iter) {
   }
   return clusters;
 }
+
