@@ -10,7 +10,7 @@ using namespace std;
 template<class T>
 void print(const vector<T> &vec) {
   for (int i=0; i < vec.size(); i++) {
-    cout << vec[i] << " ";
+    cout << vec[i] << ", ";
   }
   cout << endl;
 }

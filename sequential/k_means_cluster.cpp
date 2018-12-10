@@ -6,19 +6,19 @@
 using namespace std;
 
 centroid_vector init_cluster_centers(int k_length, const data_map &dataset){
-    vector<float> sample_map_data = dataset.begin()->second; 
+    vector<float> sample_map_data = dataset.begin()->second;
     int num_features = sample_map_data.size();
-    vector<float> min_map_data = dataset.begin()->second; 
-    vector<float> max_map_data = dataset.begin()->second; 
+    vector<float> min_map_data = dataset.begin()->second;
+    vector<float> max_map_data = dataset.begin()->second;
     for (data_map::const_iterator it = dataset.begin(); it != dataset.end(); it++) {
       for (int i=0; i<num_features; i++){
-        if ((it->second)[i]<min_map_data[i]){
-          min_map_data[i] = (it->second)[i];
+        if (it->second[i] < min_map_data[i]){
+          min_map_data[i] = it->second[i];
         }
-        if ((it->second)[i]>min_map_data[i]){
-          min_map_data[i] = (it->second)[i];
+        if (it->second[i] > max_map_data[i]){
+          max_map_data[i] = it->second[i];
         }
-      } 
+      }
     }
     centroid_vector centroids =  gen_random_centroids(k_length, num_features , min_map_data, max_map_data);
     return centroids;
@@ -87,11 +87,12 @@ cluster_vector find_clusters(int k, data_map data, int max_iter) {
       int closest_center = find_closest_center(it->second, cluster_centers);
       clusters[closest_center].push_back(it->first);
     }
-
     bool didChange = update_cluster_centers(cluster_centers, clusters, data);
     if (!didChange) {
+      cout << "Finished after " << i << " iterations." << endl;
       return clusters;
     }
+    cout << "Iteration: " << i << endl;
   }
   return clusters;
 }
