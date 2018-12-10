@@ -1,3 +1,6 @@
+#ifndef _READ_CSV
+#define _READ_CSV
+
 #include <iostream>
 #include <algorithm>
 #include <sstream>
@@ -34,3 +37,32 @@ data_map read_csv(string filename) {
   }
   return final_map;
 }
+
+college_dataset fill_college_struct(const data_map& college_data){
+
+    vector<float> sample_map_data = college_data.begin()->second; 
+  
+    college_dataset data;
+    data.size = college_data.size();
+    data.dimensions = sample_map_data.size();
+    data.names = new string[data.size];
+    data.features = new float *[data.size];
+    for (int i=0; i<data.size; i++)
+      data.features[i] = new float[data.dimensions];
+  
+    int index = 0;
+    for (data_map::const_iterator it = college_data.begin(); it != college_data.end(); it++) {
+        data.names[index] = it->first;
+        for (int j=0; j<data.dimensions; j++)
+          data.features[index][j] = (it->second)[j];
+        index++;
+    } 
+    return data;
+}
+
+college_dataset read_csv_to_college_struct(string filename) {
+  data_map data = read_csv(filename);
+  return fill_college_struct(data);
+}
+
+#endif

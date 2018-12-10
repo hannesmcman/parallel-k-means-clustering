@@ -44,27 +44,27 @@ centroid_vector gen_random_centroids(int k, int numFeatures, vector<float> min, 
   return centroids;
 }
 
-college_dataset fill_college_struct(const data_map& college_data){
+// college_dataset fill_college_struct(const data_map& college_data){
 
-  vector<float> sample_map_data = college_data.begin()->second; 
+//   vector<float> sample_map_data = college_data.begin()->second; 
 
-  college_dataset data;
-  data.size = college_data.size();
-  data.dimensions = sample_map_data.size();
-  data.names = new string[data.size];
-  data.features = new float *[data.size];
-  for (int i=0; i<data.size; i++)
-    data.features[i] = new float[data.dimensions];
+//   college_dataset data;
+//   data.size = college_data.size();
+//   data.dimensions = sample_map_data.size();
+//   data.names = new string[data.size];
+//   data.features = new float *[data.size];
+//   for (int i=0; i<data.size; i++)
+//     data.features[i] = new float[data.dimensions];
 
-  int index = 0;
-  for (data_map::const_iterator it = college_data.begin(); it != college_data.end(); it++) {
-      data.names[index] = it->first;
-      for (int j=0; j<data.dimensions; j++)
-        data.features[index][j] = (it->second)[j];
-      index++;
-  } 
-  return data;
-}
+//   int index = 0;
+//   for (data_map::const_iterator it = college_data.begin(); it != college_data.end(); it++) {
+//       data.names[index] = it->first;
+//       for (int j=0; j<data.dimensions; j++)
+//         data.features[index][j] = (it->second)[j];
+//       index++;
+//   } 
+//   return data;
+// }
 
 float euclidean_distance_array(const float * x,const float * y, int n) {
   float sum = 0;
