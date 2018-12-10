@@ -12,7 +12,7 @@ cluster_vector find_clusters(int k, data_map data, int max_iter) {
   cluster_vector clusters(k);
   for (int i=0; i < max_iter; i++) {
     clusters = cluster_vector(k);
-#pragma openmp parallel for default(shared)
+#pragma omp parallel for default(shared)
     for (data_map::iterator it = data.begin(); it != data.end(); it++) {
       int closest_center = find_closest_center(it->second, cluster_centers);
       clusters[closest_center].push_back(it->first);
