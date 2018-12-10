@@ -6,6 +6,8 @@
 // #include <thrust/device_vector>
 using namespace std;
 
+#define FLOAT_MAX 3.402823e+38
+
 // cluster assignment using randomization
 int * init_cluster_assignment(int k, int size, int * cluster_size){
   for (int i=0; i<k; i++)
@@ -61,7 +63,7 @@ bool update_clusters(int k, float ** cluster, const int * cluster_assignment, co
 
 
 int find_nearest_center(int k, const float * features, int dimensions,float ** cluster){
-  float minDist = FLT_MAX;
+  float minDist = FLOAT_MAX;
   int minIndex = 0;
   float dist = 0;
   for (int i=0; i<k; i++){
