@@ -1,3 +1,6 @@
+#ifndef EUCLIDEAN_DISTANCE
+#define EUCLIDEAN_DISTANCE
+
 #include <cmath>
 using namespace std;
 
@@ -8,3 +11,5 @@ float euclidean_distance(vector<float> x, vector<float> y) {
   }
   return sqrt(sum);
 }
+
+#endif
