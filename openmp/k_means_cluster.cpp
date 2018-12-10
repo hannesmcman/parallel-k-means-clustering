@@ -7,7 +7,7 @@
 #include <omp.h>
 using namespace std;
 
-void order_data(data_map unordered_data, vector< vector<float> > &ordered_data, vector<string> data_labels) {
+void order_data(data_map unordered_data, vector< vector<float> > &ordered_data, vector<string> &data_labels) {
   for (data_map::iterator it = unordered_data.begin(); it != unordered_data.end(); it++) {
     ordered_data.push_back(it->second);
     data_labels.push_back(it->first);
@@ -19,7 +19,7 @@ cluster_vector find_clusters(int k, data_map data, int max_iter) {
   cluster_vector clusters(k);
   vector< vector<float> > ordered_data;
   vector<string> data_labels;
-  order_data(unordered_data, ordered_data, data_labels);
+  order_data(data, ordered_data, data_labels);
   for (int i=0; i < max_iter; i++) {
     clusters = cluster_vector(k);
 #pragma omp parallel for default(shared)
