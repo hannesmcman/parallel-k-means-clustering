@@ -14,6 +14,17 @@ void order_data(data_map unordered_data, vector< vector<float> > &ordered_data, 
   }
 }
 
+cluster_vector merge_clusters(cluster_vector &private, cluster_vector shared) {
+  for (unsigned i=0; i < shared.size(); i++) {
+    for (unsigned j=0; j < private[i].size(); i++) {
+      shared.push_back(private[j]);
+    }
+  }
+  return shared
+}
+
+#pragma omp declare reduction (merge : cluster_vector : merge_clusters(omp_in, omp_out))
+
 cluster_vector find_clusters(int k, data_map data, int max_iter) {
   centroid_vector cluster_centers = init_cluster_centers(k, data);
   cluster_vector clusters(k);
@@ -22,7 +33,7 @@ cluster_vector find_clusters(int k, data_map data, int max_iter) {
   order_data(data, ordered_data, data_labels);
   for (int i=0; i < max_iter; i++) {
     clusters = cluster_vector(k);
-#pragma omp parallel for default(shared)
+#pragma omp parallel for reduction(merge: clusters)
     for (unsigned i=0; i < ordered_data.size(); i++) {
       int closest_center = find_closest_center(ordered_data[i], cluster_centers);
       clusters[closest_center].push_back(data_labels[i]);
