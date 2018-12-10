@@ -53,8 +53,6 @@ void init_cluster_assignment(int k, int size, int * cluster_size, int * cluster_
     }
   }
 
-
-
 bool update_clusters(int k, float ** cluster, const int * cluster_assignment, const college_dataset &data, const int * cluster_size){
 bool did_change = 0;
 
@@ -82,7 +80,6 @@ for (int i=0; i<k; i++){
     }
     for (int j=0; j<data.dimensions; j++){
     if (cluster[i][j] != temp[i][j]/cluster_size[i]){
-    // cout << cluster[i][j] << "  " << temp[i][j]/cluster_size[i] << endl;
         did_change = 1;
     }
     cluster[i][j] = temp[i][j]/cluster_size[i];
@@ -138,27 +135,24 @@ cudaMallocManaged(&cluster_assignment, data.size*sizeof(int));
 
 init_cluster_assignment<<1,1>>(k, data.size, cluster_size, cluster_assignment);
 
-float ** cluster;
-cluster = new float* [k];
-for (int i=0; i<k; i++)
-    cluster[i] = new float[data.dimensions];
+    float ** cluster;
+    cluster = new float* [k];
+    for (int i=0; i<k; i++)
+        cluster[i] = new float[data.dimensions];
 
 
-for (int i=0; i < max_iter; i++) {
-    // cout << iter++ << endl;
-    bool did_change = update_clusters(k, cluster, cluster_assignment, data, cluster_size);
-    if (did_change){
-    update_cluster_assignment(k, cluster_assignment, cluster_size, cluster, data);
+    for (int i=0; i < max_iter; i++) {
+        // cout << iter++ << endl;
+        bool did_change = update_clusters(k, cluster, cluster_assignment, data, cluster_size);
+        if (did_change){
+        update_cluster_assignment(k, cluster_assignment, cluster_size, cluster, data);
+        }
+        else{
+        return cluster_assignment;
+        }
     }
-    else{
     return cluster_assignment;
-    }
 }
-return cluster_assignment;
-}
-  
-
-
 
 
 int main(){
