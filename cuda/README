@@ -1,0 +1,7 @@
+#Cuda implementation lives here
+
+Using thrust library with Cuda
+
+To compile:
+
+nvcc -o main main.cu
