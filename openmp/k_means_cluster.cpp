@@ -8,7 +8,7 @@
 using namespace std;
 
 void order_data(data_map unordered_data, vector< vector<float> > &ordered_data, vector<string> data_labels) {
-  for (data_map::iterator it = data.begin(); it != data.end(); it++) {
+  for (data_map::iterator it = unordered_data.begin(); it != unordered_data.end(); it++) {
     ordered_data.push_back(it->second);
     data_labels.push_back(it->first);
   }
