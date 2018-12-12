@@ -1,15 +1,15 @@
 #include "../lib/types.cpp"
-#include "../lib/euclidean_distance.cpp"
-#include "../lib/helpers.cpp"
+#include "./lib/euclidean_distance.cpp"
+#include "./lib/helpers.cpp"
 #include <cfloat>
 #include <iostream>
 using namespace std;
 
 centroid_vector init_cluster_centers(int k_length, const data_map &dataset){
-    vector<float> sample_map_data = dataset.begin()->second; 
+    vector<float> sample_map_data = dataset.begin()->second;
     int num_features = sample_map_data.size();
-    vector<float> min_map_data = dataset.begin()->second; 
-    vector<float> max_map_data = dataset.begin()->second; 
+    vector<float> min_map_data = dataset.begin()->second;
+    vector<float> max_map_data = dataset.begin()->second;
     for (data_map::const_iterator it = dataset.begin(); it != dataset.end(); it++) {
       for (int i=0; i<num_features; i++){
         if ((it->second)[i]<min_map_data[i]){
@@ -18,7 +18,7 @@ centroid_vector init_cluster_centers(int k_length, const data_map &dataset){
         if ((it->second)[i]>min_map_data[i]){
           min_map_data[i] = (it->second)[i];
         }
-      } 
+      }
     }
     centroid_vector centroids =  gen_random_centroids(k_length, num_features , min_map_data, max_map_data);
     return centroids;
@@ -79,21 +79,19 @@ int find_closest_center(vector<float> item, centroid_vector centroids) {
 }
 
 cluster_vector find_clusters(int k, data_map data, int max_iter) {
-  int iter = 0;
   centroid_vector cluster_centers = init_cluster_centers(k, data);
-  cluster_vector clusters;
+  cluster_vector clusters(k);
   for (int i=0; i < max_iter; i++) {
     clusters = cluster_vector(k);
     for (data_map::iterator it = data.begin(); it != data.end(); it++) {
       int closest_center = find_closest_center(it->second, cluster_centers);
       clusters[closest_center].push_back(it->first);
     }
+
     bool didChange = update_cluster_centers(cluster_centers, clusters, data);
     if (!didChange) {
-      cout << "NO CHANGES ::: " << endl;;
       return clusters;
     }
-    cout << iter++ << endl;
   }
   return clusters;
 }
