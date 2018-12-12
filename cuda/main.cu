@@ -1,3 +1,4 @@
+#include <float.h>
 #include "./lib/read_csv.cpp"
 #include "../lib/types.cpp"
 using namespace std;
@@ -38,7 +39,7 @@ float euclidean_distance_array(const float * x,const float * y, int n) {
   
 
 // cluster assignment using randomization
-__global__
+// __global__
 void init_cluster_assignment(int k, int size, int * cluster_size, int * cluster_assignment){
     for (int i=0; i<k; i++)
       cluster_size[i] = 0;
@@ -133,7 +134,7 @@ int * cluster_assignment;
 cudaMallocManaged(&cluster_size, k*sizeof(int));
 cudaMallocManaged(&cluster_assignment, data.size*sizeof(int));
 
-init_cluster_assignment<<1,1>>(k, data.size, cluster_size, cluster_assignment);
+init_cluster_assignment(k, data.size, cluster_size, cluster_assignment);
 
     float ** cluster;
     cluster = new float* [k];
@@ -155,6 +156,15 @@ init_cluster_assignment<<1,1>>(k, data.size, cluster_size, cluster_assignment);
 }
 
 
+
+// CUDA Kernel function to add the elements of two arrays on the GPU
+__global__
+void add(int n, float *x, float *y)
+{
+  for (int i = 0; i < n; i++)
+      y[i] = x[i] + y[i];
+}
+
 int main(){
   data_map college_data = read_csv("./datasets/College.csv");
   college_dataset data = fill_college_struct(college_data);
@@ -164,4 +174,35 @@ int main(){
 
   // print_cluster(k, cluster, data.size, data);
   print_cluster_size(k, cluster, data.size);
+ ///////////
+  int N = 1<<20;
+  float *x, *y;
+
+  // Allocate Unified Memory – accessible from CPU or GPU
+  cudaMallocManaged(&x, N*sizeof(float));
+  cudaMallocManaged(&y, N*sizeof(float));
+
+  // initialize x and y arrays on the host
+  for (int i = 0; i < N; i++) {
+    x[i] = 1.0f;
+    y[i] = 2.0f;
+  }
+
+  // Run kernel on 1M elements on the GPU
+  add<<<1, 1>>>(N, x, y);
+
+  // Wait for GPU to finish before accessing on host
+  cudaDeviceSynchronize();
+
+  // Check for errors (all values should be 3.0f)
+  float maxError = 0.0f;
+  for (int i = 0; i < N; i++)
+    maxError = fmax(maxError, fabs(y[i]-3.0f));
+  std::cout << "Max error: " << maxError << std::endl;
+
+  // Free memory
+  cudaFree(x);
+  cudaFree(y);
+
+
 }
