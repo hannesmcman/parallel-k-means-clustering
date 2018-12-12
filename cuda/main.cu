@@ -161,8 +161,10 @@ init_cluster_assignment(k, data.size, cluster_size, cluster_assignment);
 __global__
 void add(int n, float *x, float *y)
 {
-  for (int i = 0; i < n; i++)
-      y[i] = x[i] + y[i];
+  int index = blockIdx.x * blockDim.x + threadIdx.x;
+  int stride = blockDim.x * gridDim.x;
+  for (int i = index; i < n; i += stride)
+    y[i] = x[i] + y[i];
 }
 
 int main(){
@@ -189,7 +191,9 @@ int main(){
   }
 
   // Run kernel on 1M elements on the GPU
-  add<<<1, 1>>>(N, x, y);
+  int blockSize = 256;
+  int numBlocks = (N + blockSize - 1) / blockSize;
+  add<<<numBlocks, blockSize>>>(N, x, y);
 
   // Wait for GPU to finish before accessing on host
   cudaDeviceSynchronize();
