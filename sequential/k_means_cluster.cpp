@@ -115,6 +115,7 @@ int * find_clusters(int k, const college_dataset data, int max_iter) {
     else{
       return cluster_assignment;
     }
+    cout << "Iteration: " << i << endl;
   }
   return cluster_assignment;
 }
