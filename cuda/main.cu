@@ -1,4 +1,5 @@
 #include <float.h>
+// #include <math.h>
 #include "./lib/read_csv.cpp"
 #include "../lib/types.cpp"
 using namespace std;
@@ -164,7 +165,7 @@ void add(int n, float *x, float *y)
   int index = blockIdx.x * blockDim.x + threadIdx.x;
   int stride = blockDim.x * gridDim.x;
   for (int i = index; i < n; i += stride)
-    y[i] = x[i] + y[i];
+    y[i] =i;
 }
 
 int main(){
@@ -202,7 +203,7 @@ int main(){
   float maxError = 0.0f;
   for (int i = 0; i < N; i++)
     maxError = fmax(maxError, fabs(y[i]-3.0f));
-  std::cout << "Max error: " << maxError << std::endl;
+  cout << "Max error: " << maxError << std::endl;y
 
   // Free memory
   cudaFree(x);
