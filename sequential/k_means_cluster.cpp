@@ -15,8 +15,8 @@ centroid_vector init_cluster_centers(int k_length, const data_map &dataset){
         if ((it->second)[i]<min_map_data[i]){
           min_map_data[i] = (it->second)[i];
         }
-        if ((it->second)[i]>min_map_data[i]){
-          min_map_data[i] = (it->second)[i];
+        if ((it->second)[i]>max_map_data[i]){
+          max_map_data[i] = (it->second)[i];
         }
       } 
     }
