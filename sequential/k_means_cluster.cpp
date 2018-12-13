@@ -24,7 +24,7 @@ int * init_cluster_assignment(int k, int size, int * cluster_size){
   return ret;
 }
 
-bool update_clusters(int k, float ** cluster, const int * cluster_assignment, const college_dataset &data, const int * cluster_size){
+bool update_clusters(int k, float ** cluster, const int * cluster_assignment, const cluster_dataset &data, const int * cluster_size){
   bool did_change = 0;
 
   float ** temp;
@@ -82,7 +82,7 @@ void print_cluster_assignment(int k, int *cluster_assignment,int n){
   }
 }
 
-void update_cluster_assignment(int k, int * cluster_assignment, int * cluster_size, float ** cluster, const college_dataset &data){
+void update_cluster_assignment(int k, int * cluster_assignment, int * cluster_size, float ** cluster, const cluster_dataset &data){
   for (int i=0; i<k; i++){
     cluster_size[i] = 0;
   }
@@ -93,8 +93,7 @@ void update_cluster_assignment(int k, int * cluster_assignment, int * cluster_si
   }
 }
 
-int * find_clusters(int k, const college_dataset data, int max_iter) {
-  int iter = 0;
+int * find_clusters(int k, const cluster_dataset data, int max_iter, int &num_iter) {
   int * cluster_size;
   cluster_size = new int[k];
   int * cluster_assignment;
@@ -107,7 +106,8 @@ int * find_clusters(int k, const college_dataset data, int max_iter) {
   cluster_assignment = init_cluster_assignment(k, data.size, cluster_size);
 
   for (int i=0; i < max_iter; i++) {
-    cout << iter++ << endl;
+    // cout << iter++ << endl;
+    num_iter++;
     bool did_change = update_clusters(k, cluster, cluster_assignment, data, cluster_size);
     if (did_change){
       update_cluster_assignment(k, cluster_assignment, cluster_size, cluster, data);
@@ -115,7 +115,7 @@ int * find_clusters(int k, const college_dataset data, int max_iter) {
     else{
       return cluster_assignment;
     }
-    cout << "Iteration: " << i << endl;
+    // cout << "Iteration: " << i << endl;
   }
   return cluster_assignment;
 }
