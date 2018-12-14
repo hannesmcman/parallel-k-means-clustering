@@ -35,9 +35,9 @@ centroid_vector gen_random_centroids(int k, int numFeatures, vector<float> min, 
 }
 
 
-void print_cluster(int k, int *cluster_assignment,int n,const college_dataset& data){
+void print_cluster(int k, int *cluster_assignment,int data_size,const college_dataset& data){
   vector<int> ret[k];
-  for (int i=0; i<n; i++){
+  for (int i=0; i<data_size; i++){
     ret[cluster_assignment[i]].push_back(i);
   }
   for (int i=0; i<k; i++){
@@ -48,11 +48,11 @@ void print_cluster(int k, int *cluster_assignment,int n,const college_dataset& d
   }
 }
 
-void print_cluster_size(int k, int *cluster_assignment,int n){
+void print_cluster_size(int k, int *cluster_assignment,int data_size){
     int size[k];
     for (int i=0; i<k; i++)
       size[i] = 0;
-    for (int i=0; i<n; i++){
+    for (int i=0; i<data_size; i++){
       size[cluster_assignment[i]]++;
     }
     for (int i=0; i<k; i++){
@@ -62,9 +62,9 @@ void print_cluster_size(int k, int *cluster_assignment,int n){
 
 
 
-float euclidean_distance_array(const float * x,const float * y, int n) {
+float euclidean_distance_array(const float * x,const float * y, int data_size) {
   float sum = 0;
-  for (int i=0; i < n; i++) {
+  for (int i=0; i < data_size; i++) {
     sum += pow(x[i] - y[i], 2);
   }
   return sqrt(sum);

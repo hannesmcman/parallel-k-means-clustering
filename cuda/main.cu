@@ -5,6 +5,7 @@
 #include "./lib/helpers.cu"
 using namespace std;
 
+__device__
 float euclidean_distance_array(const float * x,const float * y, int n) {
     float sum = 0;
     for (int i=0; i < n; i++) {
@@ -49,7 +50,8 @@ void init_cluster_assignment(int k, int size, int * cluster_size, int * cluster_
   }
 
 __global__
-void update_clusters(int k, float ** cluster, const int * cluster_assignment, int data_size, int dimensions, float  ** feature_vector,const int * cluster_size, int * response){
+void update_clusters(int k, float ** cluster, const int * cluster_assignment, int data_size, \
+                int dimensions, float  ** feature_vector,const int * cluster_size, int * response){
     response[0] = 0;
 
     float ** temp;
@@ -69,8 +71,6 @@ void update_clusters(int k, float ** cluster, const int * cluster_assignment, in
         }
     }
 
-    printf("College :: %d \n", dimensions);
-
     for (int i=0; i<k; i++){
         if (cluster_size[i] == 0){
             std::printf("ZERO ::: %d \n", i);    
@@ -86,6 +86,7 @@ void update_clusters(int k, float ** cluster, const int * cluster_assignment, in
     }
 }
 
+__device__
 int find_nearest_center(int k, const float * features, int dimensions,float ** cluster){
     float minDist = FLT_MAX;
     int minIndex = 0;
@@ -100,26 +101,26 @@ int find_nearest_center(int k, const float * features, int dimensions,float ** c
     return minIndex;
 }
 
-// __global__
-void update_cluster_assignment(int k, int * cluster_assignment, int * cluster_size, float ** cluster, const college_dataset &data){
+__global__
+void update_cluster_assignment(int k, int * cluster_assignment, int * cluster_size, float ** cluster, int size, int dimension, float ** features){
     for (int i=0; i<k; i++){
         cluster_size[i] = 0;
     }
 
-    for (int i=0; i<data.size; i++){
-        cluster_assignment[i] = find_nearest_center(k, data.features[i], data.dimensions, cluster);
+    for (int i=0; i<size; i++){
+        cluster_assignment[i] = find_nearest_center(k, features[i], dimension, cluster);
         cluster_size[cluster_assignment[i]]++;
     }
 }
 
-void parse_data(const data_map &data, int &size, int &dimensions, string ** data_title, float *** data_vector){
+void parse_data(const data_map &data, int &size, int &dimensions, string ** data_title, float *** data_features){
     vector<float> sample_map_data = data.begin()->second; 
     size = data.size();   
     dimensions = sample_map_data.size();
 
     cudaMallocManaged(data_title, size*sizeof(string)); 
-    cudaMallocManaged(data_vector, size*sizeof(float*));
-    float ** data_v = *data_vector;
+    cudaMallocManaged(data_features, size*sizeof(float*));
+    float ** data_v = *data_features;
 
     for (int i=0; i<size; i++)
         cudaMallocManaged(&data_v[i], dimensions*sizeof(float)); 
@@ -143,8 +144,8 @@ int * find_clusters(int k, const data_map data, int max_iter) {
     int data_dimensions;
     int data_size;
     string * data_title;
-    float ** data_vector;
-    parse_data(data, data_size, data_dimensions, &data_title, &data_vector);
+    float ** data_features;
+    parse_data(data, data_size, data_dimensions, &data_title, &data_features);
     cout << "Size : " << data_size << "  dim : " << data_dimensions << endl;
 
 
@@ -170,20 +171,23 @@ int * find_clusters(int k, const data_map data, int max_iter) {
     cudaMallocManaged(&did_change, sizeof(int));
 
     for (int i=0; i < max_iter; i++) {
-        update_clusters<<<1,1>>>(k, cluster, cluster_assignment, data_size, data_dimensions, data_vector, cluster_size, did_change);
+        update_clusters<<<numBlocks ,blockSize>>>(k, cluster, cluster_assignment, data_size, data_dimensions, data_features, cluster_size, did_change);
         cudaDeviceSynchronize();
 
-        // if (did_change[0] == 1){
-        //     update_cluster_assignment(k, cluster_assignment, cluster_size, cluster, data);
-        // }
-        // // update_cluster_assignment<<<numBlocks ,blockSize >>>(k, cluster_assignment, cluster_size, cluster, data);
-        // // cudaDeviceSynchronize();
-        //         // }
-        // else{    
-        //     return cluster_assignment;
-        // }
+        if (did_change[0] == 1){
+            // update_cluster_assignment(k, cluster_assignment, cluster_size, cluster, data);
+            update_cluster_assignment<<<1,1>>>(k, cluster_assignment, cluster_size, cluster, data_size, data_dimensions, data_features);
+            cudaDeviceSynchronize();
+                }
+        else{    
+            print_cluster_size(k, cluster_assignment,int data_size);
+            return cluster_assignment;
+        }
             }
+
+    print_cluster_size(k, cluster_assignment,int data_size);
     return cluster_assignment;
+
 }
 
 
@@ -206,7 +210,6 @@ int main(){
 
   int k = 10; 
   int * cluster = find_clusters(k, data, 1);
-
 
 //   cudaFree(x);
 //   cudaFree(y);
