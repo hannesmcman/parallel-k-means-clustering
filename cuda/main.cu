@@ -48,34 +48,38 @@ void init_cluster_assignment(int k, int size, int * cluster_size, int * cluster_
     }
   }
 
-bool update_clusters(int k, float ** cluster, const int * cluster_assignment, const college_dataset &data, const int * cluster_size, bool &response){
-    response = 0;
+__global__
+void update_clusters(int k, float ** cluster, const int * cluster_assignment, const int dimensions, float  ** feature_vector,const int * cluster_size, int * response){
+    response[0] = 0;
 
     float ** temp;
     temp = new float* [k];
     for (int i=0; i<k; i++)
-        temp[i] = new float[data.dimensions];
+        temp[i] = new float[dimensions];
 
     for (int i=0; i<k; i++){
-        for (int j=0; j<data.dimensions; j++){
+        for (int j=0; j<dimensions; j++){
         temp[i][j] = (float) 0;
         }
     }  
 
     for (int i=0; i<data.size; i++){
-        for (int j=0; j<data.dimensions; j++){
-        temp[cluster_assignment[i]][j] += data.features[i][j];   
+        for (int j=0; j<dimensions; j++){
+        temp[cluster_assignment[i]][j] += feature_vector[i][j];   
         }
     }
 
+    printf("College :: %d \n", dimensions);
+
     for (int i=0; i<k; i++){
         if (cluster_size[i] == 0){
-        cout << "ZERO ::: " << i << endl;
+            std::printf("ZERO ::: %d \n", i);    
+        // cout << "ZERO ::: " << i << endl;
         continue;
         }
-        for (int j=0; j<data.dimensions; j++){
+        for (int j=0; j<dimensions; j++){
         if (cluster[i][j] != temp[i][j]/cluster_size[i]){
-            response = 1;
+            response[0] = 1;
         }
         cluster[i][j] = temp[i][j]/cluster_size[i];
         }
@@ -108,61 +112,76 @@ void update_cluster_assignment(int k, int * cluster_assignment, int * cluster_si
     }
 }
 
+void parse_data(const data_map &data, int &size, int &dimensions, string ** data_title, float *** data_vector){
+    vector<float> sample_map_data = data.begin()->second; 
+    size = data.size();   
+    dimensions = sample_map_data.size();
 
-int * find_clusters(int k, const college_dataset data, int max_iter) {
-    int iter = 0;
+    // cudaMallocManaged(&data_title, size*sizeof(string)); 
+    // cudaMallocManaged(&data_vector, size*sizeof(float*));
+    // for (int i=0; i<size; i++)
+    //     cudaMallocManaged(&data_vetor[i], dimensions*sizeof(float)); 
+
+    // int index = 0;
+    // for (data_map::const_iterator it = data.begin(); it != data.end(); it++) {
+    //     data_title[index] = it->first;
+    //     for (int j=0; j<dimensions; j++)
+    //         data_vetor[index][j] = (it->second)[j];
+    //     index++;
+    // } 
+
+}
+
+
+int * find_clusters(int k, const data_map data, int max_iter) {
+    // int iter = 0;
     int * cluster_size;
     int * cluster_assignment;
 
-    // cluster_size = new int[k]; 
+    // college data parsing
+    int data_dimensions;
+    int data_size;
+    string * data_title;
+    float ** data_vector;
+    parse_data(data, data_dimensions, data_size, &data_title, &data_vector);
+    cout << "Size : " << data_size << "  dim : " << data_dimensions << endl;
+
 
     cudaMallocManaged(&cluster_size, k*sizeof(int));
-    cudaMallocManaged(&cluster_assignment, data.size*sizeof(int));
+    cudaMallocManaged(&cluster_assignment, data_size*sizeof(int));
 
     int blockSize = 256;
-    int numBlocks = (data.size + blockSize - 1) / blockSize;
+    int numBlocks = (data_size + blockSize - 1) / blockSize;
 
-    init_cluster_assignment<<<numBlocks ,blockSize >>>(k, data.size, cluster_size, cluster_assignment);
+    init_cluster_assignment<<<numBlocks ,blockSize >>>(k, data_size, cluster_size, cluster_assignment);
     // Wait for GPU to finish before accessing on host
     cudaDeviceSynchronize();
 
-    calculate_cluster_size(k, cluster_assignment, data.size, cluster_size);
-
-    print_cluster_size(k,cluster_assignment,data.size);
+    calculate_cluster_size(k, cluster_assignment, data_size, cluster_size);
 
     float ** cluster;
     cudaMallocManaged(&cluster, k*sizeof(float*));
 
-    // cluster = new float* [k];
     for (int i=0; i<k; i++)
-        cudaMallocManaged(&cluster[i], data.dimensions*sizeof(float));
-        // cluster[i] = new float[data.dimensions];
+        cudaMallocManaged(&cluster[i], data_dimensions*sizeof(float));
 
-    bool did_change;
-    cudaMallocManaged(did_change, sizeof(int));
-
+    int * did_change;
+    cudaMallocManaged(&did_change, sizeof(int));
 
     for (int i=0; i < max_iter; i++) {
-        cout << "iteration : " << iter++ << endl; 
-        update_clusters(k, cluster, cluster_assignment, data, cluster_size, did_change);
+        update_clusters<<<1,1>>>(k, cluster, cluster_assignment, data_dimensions, data_vector, cluster_size, did_change);
+        cudaDeviceSynchronize();
 
-        for (int i=0; i<k; i++)
-            cout << i << ":" << cluster_size[i] << endl;
-
-        if (did_change){
-            cout << "did change : " << iter << endl;
-            update_cluster_assignment(k, cluster_assignment, cluster_size, cluster, data);
-
+        // if (did_change[0] == 1){
+        //     update_cluster_assignment(k, cluster_assignment, cluster_size, cluster, data);
+        // }
         // update_cluster_assignment<<<numBlocks ,blockSize >>>(k, cluster_assignment, cluster_size, cluster, data);
         // cudaDeviceSynchronize();
-        }
-        else{    
-            print_cluster_size(k,cluster_assignment,data.size);
-            return cluster_assignment;
-        }
-        iter++;
-    }
-    print_cluster_size(k, cluster_assignment, data.size);
+                // }
+                // else{    
+                //     return cluster_assignment;
+                // }
+            }
     return cluster_assignment;
 }
 
@@ -182,42 +201,12 @@ int * find_clusters(int k, const college_dataset data, int max_iter) {
 
 
 int main(){
-  data_map college_data = read_csv("./datasets/College.csv");
-  college_dataset data = fill_college_struct(college_data);
-  
+  data_map data = read_csv("./datasets/College.csv");
+
   int k = 10; 
-  int * cluster = find_clusters(k, data, 100);
+  int * cluster = find_clusters(k, data, 1);
 
-  print_cluster_size(k, cluster, data.size);
-//   int N = 1<<20;
-//   float *x, *y;
 
-//   // Allocate Unified Memory – accessible from CPU or GPU
-//   cudaMallocManaged(&x, N*sizeof(float));
-//   cudaMallocManaged(&y, N*sizeof(float));
-
-//   // initialize x and y arrays on the host
-//   for (int i = 0; i < N; i++) {
-//     x[i] = 1.0f;
-//     y[i] = 2.0f;
-//   }
-
-//   // Run kernel on 1M elements on the GPU
-//   int blockSize = 256;
-//   int numBlocks = (N + blockSize - 1) / blockSize;
-
-//   add<<<numBlocks, blockSize>>>(N, x, y);
-
-//   // Wait for GPU to finish before accessing on host
-//   cudaDeviceSynchronize();
-
-//   // Check for errors (all values should be 3.0f)
-//   float maxError = 0.0f;
-//   for (int i = 0; i < N; i++)
-//     maxError = std::fmax(maxError, fabs(y[i]-3.0f));
-//   cout << "Max error: " << maxError << std::endl;
-
-//   // Free memory
 //   cudaFree(x);
 //   cudaFree(y);
 }
