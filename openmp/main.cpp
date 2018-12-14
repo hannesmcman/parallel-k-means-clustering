@@ -1,6 +1,6 @@
 #include "../lib/io.cpp"
-#include "./lib/helpers.cpp"
-#include "./k_means_cluster.cpp"
+#include "../sequential/lib/helpers.cpp"
+#include "./openmp_cluster.cpp"
 #include <string>
 #include <sstream>
 using namespace std;

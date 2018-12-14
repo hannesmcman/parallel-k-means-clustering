@@ -1,3 +1,6 @@
+#ifndef IO_H
+#define IO_H
+
 #include <iostream>
 #include <algorithm>
 #include <sstream>
@@ -34,3 +37,5 @@ data_map read_csv(string filename) {
   }
   return final_map;
 }
+
+#endif

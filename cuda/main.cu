@@ -1,9 +1,9 @@
 #include <float.h>
-#include "./lib/read_csv.cpp"
+#include "./lib/io.cpp"
 #include "../lib/types.cpp"
 using namespace std;
 
-void print_cluster(int k, int *cluster_assignment,int n,const college_dataset& data){
+void print_cluster(int k, int *cluster_assignment,int n,const cluster_dataset& data){
   vector<int> ret[k];
   for (int i=0; i<n; i++){
     ret[cluster_assignment[i]].push_back(i);
@@ -54,7 +54,7 @@ void init_cluster_assignment(int k, int size, int * cluster_size, int * cluster_
     }
   }
 
-bool update_clusters(int k, float ** cluster, const int * cluster_assignment, const college_dataset &data, const int * cluster_size){
+bool update_clusters(int k, float ** cluster, const int * cluster_assignment, const cluster_dataset &data, const int * cluster_size){
 bool did_change = 0;
 
 float ** temp;
@@ -112,7 +112,7 @@ for (int i=0; i<n; i++){
 }
 }
 
-void update_cluster_assignment(int k, int * cluster_assignment, int * cluster_size, float ** cluster, const college_dataset &data){
+void update_cluster_assignment(int k, int * cluster_assignment, int * cluster_size, float ** cluster, const cluster_dataset &data){
 for (int i=0; i<k; i++){
     cluster_size[i] = 0;
 }
@@ -124,7 +124,7 @@ for (int i=0; i<data.size; i++){
 }
 
 
-int * find_clusters(int k, const college_dataset data, int max_iter) {
+int * find_clusters(int k, const cluster_dataset data, int max_iter) {
 // int iter = 0;
 int * cluster_size;
 int * cluster_assignment;
@@ -167,7 +167,7 @@ void add(int n, float *x, float *y)
 
 int main(){
   data_map college_data = read_csv("./datasets/College.csv");
-  college_dataset data = fill_college_struct(college_data);
+  cluster_dataset data = fill_college_struct(college_data);
   
   int k = 10; 
   int * cluster = find_clusters(k, data, 100);

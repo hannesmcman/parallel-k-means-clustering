@@ -5,11 +5,11 @@
 #include <vector>
 using namespace std;
 
-college_dataset fill_college_struct(const data_map& college_data){
+cluster_dataset fill_college_struct(const data_map& college_data){
 
   vector<float> sample_map_data = college_data.begin()->second;
 
-  college_dataset data;
+  cluster_dataset data;
   data.size = college_data.size();
   data.dimensions = sample_map_data.size();
   data.names = new string[data.size];
