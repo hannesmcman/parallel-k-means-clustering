@@ -49,7 +49,7 @@ void init_cluster_assignment(int k, int size, int * cluster_size, int * cluster_
   }
 
 __global__
-void update_clusters(int k, float ** cluster, const int * cluster_assignment, const int dimensions, float  ** feature_vector,const int * cluster_size, int * response){
+void update_clusters(int k, float ** cluster, const int * cluster_assignment, int data_size, int dimensions, float  ** feature_vector,const int * cluster_size, int * response){
     response[0] = 0;
 
     float ** temp;
@@ -63,7 +63,7 @@ void update_clusters(int k, float ** cluster, const int * cluster_assignment, co
         }
     }  
 
-    for (int i=0; i<data.size; i++){
+    for (int i=0; i<data_size; i++){
         for (int j=0; j<dimensions; j++){
         temp[cluster_assignment[i]][j] += feature_vector[i][j];   
         }
@@ -117,21 +117,22 @@ void parse_data(const data_map &data, int &size, int &dimensions, string ** data
     size = data.size();   
     dimensions = sample_map_data.size();
 
-    // cudaMallocManaged(&data_title, size*sizeof(string)); 
-    // cudaMallocManaged(&data_vector, size*sizeof(float*));
-    // for (int i=0; i<size; i++)
-    //     cudaMallocManaged(&data_vetor[i], dimensions*sizeof(float)); 
+    cudaMallocManaged(data_title, size*sizeof(string)); 
+    cudaMallocManaged(data_vector, size*sizeof(float*));
+    float ** data_v = *data_vector;
 
-    // int index = 0;
-    // for (data_map::const_iterator it = data.begin(); it != data.end(); it++) {
-    //     data_title[index] = it->first;
-    //     for (int j=0; j<dimensions; j++)
-    //         data_vetor[index][j] = (it->second)[j];
-    //     index++;
-    // } 
+    for (int i=0; i<size; i++)
+        cudaMallocManaged(&data_v[i], dimensions*sizeof(float)); 
+
+    int index = 0;
+    for (data_map::const_iterator it = data.begin(); it != data.end(); it++) {
+        (*data_title)[index] = it->first;
+        for (int j=0; j<dimensions; j++)
+            data_v[index][j] = (it->second)[j];
+        index++;
+    } 
 
 }
-
 
 int * find_clusters(int k, const data_map data, int max_iter) {
     // int iter = 0;
@@ -143,7 +144,7 @@ int * find_clusters(int k, const data_map data, int max_iter) {
     int data_size;
     string * data_title;
     float ** data_vector;
-    parse_data(data, data_dimensions, data_size, &data_title, &data_vector);
+    parse_data(data, data_size, data_dimensions, &data_title, &data_vector);
     cout << "Size : " << data_size << "  dim : " << data_dimensions << endl;
 
 
@@ -169,18 +170,18 @@ int * find_clusters(int k, const data_map data, int max_iter) {
     cudaMallocManaged(&did_change, sizeof(int));
 
     for (int i=0; i < max_iter; i++) {
-        update_clusters<<<1,1>>>(k, cluster, cluster_assignment, data_dimensions, data_vector, cluster_size, did_change);
+        update_clusters<<<1,1>>>(k, cluster, cluster_assignment, data_size, data_dimensions, data_vector, cluster_size, did_change);
         cudaDeviceSynchronize();
 
         // if (did_change[0] == 1){
         //     update_cluster_assignment(k, cluster_assignment, cluster_size, cluster, data);
         // }
-        // update_cluster_assignment<<<numBlocks ,blockSize >>>(k, cluster_assignment, cluster_size, cluster, data);
-        // cudaDeviceSynchronize();
-                // }
-                // else{    
-                //     return cluster_assignment;
-                // }
+        // // update_cluster_assignment<<<numBlocks ,blockSize >>>(k, cluster_assignment, cluster_size, cluster, data);
+        // // cudaDeviceSynchronize();
+        //         // }
+        // else{    
+        //     return cluster_assignment;
+        // }
             }
     return cluster_assignment;
 }
