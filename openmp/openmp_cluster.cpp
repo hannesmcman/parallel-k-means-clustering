@@ -32,19 +32,17 @@ bool update_clusters(int k, float ** cluster, const int * cluster_assignment, co
   for (int i=0; i<k; i++)
     temp[i] = new float[data.dimensions];
 
-  for (int i=0; i<k; i++){
+  int i;
+
+#pragma omp parallel for private(i)
+  for (i=0; i<data.size; i++){
     for (int j=0; j<data.dimensions; j++){
-      temp[i][j] = (float) 0;
+      temp[cluster_assignment[i]][j] = data.features[i][j];
     }
   }
 
-  for (int i=0; i<data.size; i++){
-    for (int j=0; j<data.dimensions; j++){
-      temp[cluster_assignment[i]][j] += data.features[i][j];
-    }
-  }
-
-  for (int i=0; i<k; i++){
+#pragma omp parallel for private(i)
+  for (i=0; i<k; i++){
     if (cluster_size[i] == 0){
       continue;
     }
