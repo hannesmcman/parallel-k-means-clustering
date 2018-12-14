@@ -7,3 +7,4 @@ cuda/sequential/main.o
 cuda/sequential/main
 .vscode/settings.json
 .DS_Store
+sequential_cuda/main.o

@@ -1,3 +1,4 @@
+#include <float.h>
 #include <string>
 #include "../../lib/types.cpp"
 #include "../cuda_lib/helpers.cu"
@@ -32,6 +33,17 @@ void parse_data(const data_map &data, int &size, int &dimensions, string ** data
     } 
 }
 
+void init_clusters(int k, int size, int dimensions, float ** features, float ** cluster){
+    srand(static_cast<unsigned int>(clock()));
+    for (int i=0; i<k; i++){
+        int index = (int) rand() % size;
+        for (int j=0; j<dimensions; j++){
+            cluster[i][j] = features[index][j];
+        }
+    }
+}
+
+
 int * find_clusters(int k, const data_map data, int max_iter) {
     // int iter = 0;
     int * cluster_size;
@@ -50,11 +62,11 @@ int * find_clusters(int k, const data_map data, int max_iter) {
     int blockSize = 256;
     int numBlocks = (data_size + blockSize - 1) / blockSize;
 
-    init_cluster_assignment<<<numBlocks ,blockSize >>>(k, data_size, cluster_size, cluster_assignment);
+    // init_cluster_assignment<<<numBlocks ,blockSize >>>(k, data_size, cluster_size, cluster_assignment);
     // Wait for GPU to finish before accessing on host
-    cudaDeviceSynchronize();
+    // cudaDeviceSynchronize();
 
-    calculate_cluster_size(k, cluster_assignment, data_size, cluster_size);
+    // calculate_cluster_size(k, cluster_assignment, data_size, cluster_size);
 
     float ** cluster;
     cudaMallocManaged(&cluster, k*sizeof(float*));
@@ -64,6 +76,18 @@ int * find_clusters(int k, const data_map data, int max_iter) {
 
     int * did_change;
     cudaMallocManaged(&did_change, sizeof(int));
+
+    //make clusters
+    init_clusters(k, data_size, data_dimensions,data_features, cluster);
+    update_cluster_assignment<<<numBlocks ,blockSize>>>(k, cluster_assignment, cluster_size, cluster, data_size, data_dimensions, data_features);
+    cudaDeviceSynchronize();
+    
+    calculate_cluster_size(k, cluster_assignment, data_size, cluster_size);
+
+
+    //update cluster assignment
+    update_cluster_assignment<<<numBlocks ,blockSize>>>(k, cluster_assignment, cluster_size, cluster, data_size, data_dimensions, data_features);
+
 
     for (int i=0; i < max_iter; i++) {
         update_clusters<<<numBlocks ,blockSize>>>(k, cluster, cluster_assignment, data_size, data_dimensions, data_features, cluster_size, did_change);
