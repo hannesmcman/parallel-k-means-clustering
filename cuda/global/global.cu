@@ -33,18 +33,19 @@ void update_clusters(int k, float ** cluster, const int * cluster_assignment, in
                 int dimensions, float  ** feature_vector,const int * cluster_size, int * response){
     response[0] = 0;
 
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
+
     float ** temp;
     temp = new float* [k];
     for (int i=0; i<k; i++)
         temp[i] = new float[dimensions];
-
-    for (int i=0; i<k; i++){
         for (int j=0; j<dimensions; j++){
-        temp[i][j] = (float) 0;
+            temp[i][j] = (float) 0;
         }
-    }  
+    }
 
-    for (int i=0; i<data_size; i++){
+    for (int i=index; i<data_size; i+=stride){
         for (int j=0; j<dimensions; j++){
         temp[cluster_assignment[i]][j] += feature_vector[i][j];   
         }
@@ -52,7 +53,7 @@ void update_clusters(int k, float ** cluster, const int * cluster_assignment, in
 
     for (int i=0; i<k; i++){
         if (cluster_size[i] == 0){
-            std::printf("ZERO ::: %d \n", i);    
+//            std::printf("ZERO ::: %d \n", i);    
         continue;
         }
         for (int j=0; j<dimensions; j++){
@@ -70,8 +71,11 @@ void update_cluster_assignment(int k, int * cluster_assignment, int * cluster_si
     for (int i=0; i<k; i++){
         cluster_size[i] = 0;
     }
+        
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
 
-    for (int i=0; i<size; i++){
+    for (int i=index; i<size; i+=stride){
         cluster_assignment[i] = find_nearest_center(k, features[i], dimension, cluster);
         cluster_size[cluster_assignment[i]]++;
     }
