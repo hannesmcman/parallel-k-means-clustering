@@ -180,12 +180,12 @@ int * find_clusters(int k, const data_map data, int max_iter) {
             cudaDeviceSynchronize();
                 }
         else{    
-            print_cluster_size(k, cluster_assignment,int data_size);
+            print_cluster_size(k, cluster_assignment,data_size);
             return cluster_assignment;
         }
             }
 
-    print_cluster_size(k, cluster_assignment,int data_size);
+    print_cluster_size(k, cluster_assignment,data_size);
     return cluster_assignment;
 
 }
