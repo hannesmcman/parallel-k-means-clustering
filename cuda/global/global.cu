@@ -1,5 +1,6 @@
 #include <float.h>
 #include <cstdlib>
+#include "../device/device.cu"
 
 // cluster assignment using randomization
 __global__
@@ -52,7 +53,6 @@ void update_clusters(int k, float ** cluster, const int * cluster_assignment, in
     for (int i=0; i<k; i++){
         if (cluster_size[i] == 0){
             std::printf("ZERO ::: %d \n", i);    
-        // cout << "ZERO ::: " << i << endl;
         continue;
         }
         for (int j=0; j<dimensions; j++){

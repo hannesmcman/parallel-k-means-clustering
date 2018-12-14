@@ -1,6 +1,7 @@
 #include <string>
-#include "../lib/types.cpp"
-#include "./cuda_lib/helpers.cu"
+#include "../../lib/types.cpp"
+#include "../cuda_lib/helpers.cu"
+#include "../global/global.cu"
 
 void calculate_cluster_size(int k, int *cluster_assignment,int n, int * cluster_size){
     for (int i=0; i<k; i++)
@@ -70,7 +71,7 @@ int * find_clusters(int k, const data_map data, int max_iter) {
 
         if (did_change[0] == 1){
             // update_cluster_assignment(k, cluster_assignment, cluster_size, cluster, data);
-            update_cluster_assignment<<<1,1>>>(k, cluster_assignment, cluster_size, cluster, data_size, data_dimensions, data_features);
+            update_cluster_assignment<<<numBlocks ,blockSize>>>(k, cluster_assignment, cluster_size, cluster, data_size, data_dimensions, data_features);
             cudaDeviceSynchronize();
                 }
         else{    
