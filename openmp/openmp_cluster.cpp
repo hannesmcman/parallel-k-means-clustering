@@ -32,19 +32,20 @@ bool update_clusters(int k, float ** cluster, const int * cluster_assignment, co
   for (int i=0; i<k; i++)
     temp[i] = new float[data.dimensions];
 
-  for (int i=0; i<k; i++){
+  int i;
+  #pragma omp parallel for
+  for (i=0; i<k; i++){
     for (int j=0; j<data.dimensions; j++){
       temp[i][j] = (float) 0;
     }
   }
 
-  for (int i=0; i<data.size; i++){
+  for (i=0; i<data.size; i++){
     for (int j=0; j<data.dimensions; j++){
       temp[cluster_assignment[i]][j] += data.features[i][j];
     }
   }
-  int i;
-#pragma omp parallel for private(i)
+  #pragma omp parallel for private(i)
   for (i=0; i<k; i++){
     if (cluster_size[i] == 0){
       continue;
@@ -91,8 +92,9 @@ void update_cluster_assignment(int k, int * cluster_assignment, int * cluster_si
 #pragma omp parallel for default(shared) private(i)
   for (i=0; i<data.size; i++){
     cluster_assignment[i] = find_nearest_center(k, data.features[i], data.dimensions, cluster);
-    cluster_size[cluster_assignment[i]]++;
   }
+  for (i=0; i < data.size; i++)
+    cluster_size[cluster_assignment[i]]++;
 }
 
 int * find_clusters(int k, const cluster_dataset data, int max_iter, int &num_iter) {
