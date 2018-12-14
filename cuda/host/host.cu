@@ -80,13 +80,17 @@ int * find_clusters(int k, const data_map data, int max_iter) {
     //make clusters
     init_clusters(k, data_size, data_dimensions,data_features, cluster);
     update_cluster_assignment<<<numBlocks ,blockSize>>>(k, cluster_assignment, cluster_size, cluster, data_size, data_dimensions, data_features);
-    cudaDeviceSynchronize();
-    
+    cudaDeviceSynchronize();    
+
     calculate_cluster_size(k, cluster_assignment, data_size, cluster_size);
 
 
-    //update cluster assignment
-    update_cluster_assignment<<<numBlocks ,blockSize>>>(k, cluster_assignment, cluster_size, cluster, data_size, data_dimensions, data_features);
+    // //update cluster assignment
+    // update_cluster_assignment<<<1 ,1>>>(k, cluster_assignment, cluster_size, cluster, data_size, data_dimensions, data_features);
+    // cudaDeviceSynchronize();  
+    print_cluster_size(k, cluster_assignment,data_size);
+    
+
 
 
     for (int i=0; i < max_iter; i++) {
