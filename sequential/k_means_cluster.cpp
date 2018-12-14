@@ -5,6 +5,25 @@
 // #include <thrust/device_vector>
 using namespace std;
 
+<<<<<<< HEAD
+centroid_vector init_cluster_centers(int k_length, const data_map &dataset){
+    vector<float> sample_map_data = dataset.begin()->second; 
+    int num_features = sample_map_data.size();
+    vector<float> min_map_data = dataset.begin()->second; 
+    vector<float> max_map_data = dataset.begin()->second; 
+    for (data_map::const_iterator it = dataset.begin(); it != dataset.end(); it++) {
+      for (int i=0; i<num_features; i++){
+        if ((it->second)[i]<min_map_data[i]){
+          min_map_data[i] = (it->second)[i];
+        }
+        if ((it->second)[i]>max_map_data[i]){
+          max_map_data[i] = (it->second)[i];
+        }
+      } 
+    }
+    centroid_vector centroids =  gen_random_centroids(k_length, num_features , min_map_data, max_map_data);
+    return centroids;
+=======
 #define FLOAT_MAX 3.402823e+38
 
 // cluster assignment using randomization
@@ -22,6 +41,7 @@ int * init_cluster_assignment(int k, int size, int * cluster_size){
     cluster_size[group] += 1;
   }
   return ret;
+>>>>>>> 081c73d7e15a80ba67712fc54785e374a78ad292
 }
 
 bool update_clusters(int k, float ** cluster, const int * cluster_assignment, const cluster_dataset &data, const int * cluster_size){

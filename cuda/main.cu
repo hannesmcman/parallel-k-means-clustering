@@ -1,8 +1,19 @@
 #include <float.h>
+<<<<<<< HEAD
+#include "../lib/read_csv.cpp"
+=======
 #include "./lib/io.cpp"
+>>>>>>> 081c73d7e15a80ba67712fc54785e374a78ad292
 #include "../lib/types.cpp"
+#include "./host/host.cu"
 using namespace std;
 
+<<<<<<< HEAD
+
+int main(){
+  data_map data = read_csv("../datasets/College.csv");
+
+=======
 void print_cluster(int k, int *cluster_assignment,int n,const cluster_dataset& data){
   vector<int> ret[k];
   for (int i=0; i<n; i++){
@@ -169,40 +180,8 @@ int main(){
   data_map college_data = read_csv("./datasets/College.csv");
   cluster_dataset data = fill_college_struct(college_data);
   
+>>>>>>> 081c73d7e15a80ba67712fc54785e374a78ad292
   int k = 10; 
   int * cluster = find_clusters(k, data, 100);
-
-  // print_cluster(k, cluster, data.size, data);
-  print_cluster_size(k, cluster, data.size);
- ///////////
-  int N = 1<<20;
-  float *x, *y;
-
-  // Allocate Unified Memory – accessible from CPU or GPU
-  cudaMallocManaged(&x, N*sizeof(float));
-  cudaMallocManaged(&y, N*sizeof(float));
-
-  // initialize x and y arrays on the host
-  for (int i = 0; i < N; i++) {
-    x[i] = 1.0f;
-    y[i] = 2.0f;
-  }
-
-  // Run kernel on 1M elements on the GPU
-  add<<<1, 1>>>(N, x, y);
-
-  // Wait for GPU to finish before accessing on host
-  cudaDeviceSynchronize();
-
-  // Check for errors (all values should be 3.0f)
-  float maxError = 0.0f;
-  for (int i = 0; i < N; i++)
-    maxError = fmax(maxError, fabs(y[i]-3.0f));
-  std::cout << "Max error: " << maxError << std::endl;
-
-  // Free memory
-  cudaFree(x);
-  cudaFree(y);
-
 
 }
