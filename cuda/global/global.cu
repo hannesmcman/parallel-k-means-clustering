@@ -2,6 +2,20 @@
 #include <cstdlib>
 #include "../device/device.cu"
 
+// __global__ void
+// reduce0(float* g_idata,float* g_odata, unsigned int n) {
+//     extern __shared__ float temp[];
+//     int thid = threadIdx.x;
+//     temp[thid] = g_idata[thid];
+//     __syncthreads();
+//     for(int offset = 1;offset < n; offset *= 2) {
+//         if(thid >= offset)
+//             temp[thid] += temp[thid - offset];
+//         __syncthreads();
+//     }
+//     g_odata[thid] = temp[thid];
+// }
+
 // cluster assignment using randomization
 __global__
 void init_cluster_assignment(int k, int size, int * cluster_size, int * cluster_assignment){
@@ -9,20 +23,13 @@ void init_cluster_assignment(int k, int size, int * cluster_size, int * cluster_
       cluster_size[i] = 0;
     int group = 0;
 
-    // srand(static_cast<unsigned int>(clock()));
-    
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
 
     int random = index % k ;
 
-    // int random = curandGenerate();
-    // std::printf("block id : %d \t block dim: %d \t thread id : %d \t index : %d \t random : %d \n",blockIdx.x, blockDim.x, threadIdx.x, index, random);
-
-    // cluster_assignment = new int[size];
     for (int i=index; i<size; i+=stride){
       group = (int) random;
-    //   group = (int) (rand() % k);
       cluster_assignment[i] = group;
       cluster_size[group] += 1;
     }
@@ -38,23 +45,22 @@ void update_clusters(int k, float ** cluster, const int * cluster_assignment, in
 
     float ** temp;
     temp = new float* [k];
-    for (int i=0; i<k; i++)
+    for (int i=0; i<k; i++){
         temp[i] = new float[dimensions];
         for (int j=0; j<dimensions; j++){
             temp[i][j] = (float) 0;
         }
     }
 
-    for (int i=index; i<data_size; i+=stride){
+    for (int i=0; i<data_size; i++){
         for (int j=0; j<dimensions; j++){
         temp[cluster_assignment[i]][j] += feature_vector[i][j];   
         }
     }
 
-    for (int i=0; i<k; i++){
+    for (int i=index; i<k; i+=stride){
         if (cluster_size[i] == 0){
-//            std::printf("ZERO ::: %d \n", i);    
-        continue;
+            continue;
         }
         for (int j=0; j<dimensions; j++){
         if (cluster[i][j] != temp[i][j]/cluster_size[i]){
@@ -67,16 +73,13 @@ void update_clusters(int k, float ** cluster, const int * cluster_assignment, in
 
 
 __global__
-void update_cluster_assignment(int k, int * cluster_assignment, int * cluster_size, float ** cluster, int size, int dimension, float ** features){
-    for (int i=0; i<k; i++){
-        cluster_size[i] = 0;
-    }
-        
+void update_cluster_assignment(int k, int * cluster_assignment, float ** cluster, int size, int dimension, float ** features){
+
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
-
+    
+    printf("in update, i : %d, s : %d \n", index, stride);
     for (int i=index; i<size; i+=stride){
         cluster_assignment[i] = find_nearest_center(k, features[i], dimension, cluster);
-        cluster_size[cluster_assignment[i]]++;
     }
 }

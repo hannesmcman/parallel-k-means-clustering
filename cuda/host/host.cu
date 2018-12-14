@@ -1,18 +1,21 @@
 #include <float.h>
+#include <iostream>
 #include <string>
 #include "../../lib/types.cpp"
 #include "../cuda_lib/helpers.cu"
 #include "../global/global.cu"
+using namespace std;
 
 void calculate_cluster_size(int k, int *cluster_assignment,int n, int * cluster_size){
     for (int i=0; i<k; i++)
       cluster_size[i] = 0;
-    for (int i=0; i<n; i++){
+    for (int i=0; i<n
+        ; i++){
       cluster_size[cluster_assignment[i]]++;
     }
   }
   
-void parse_data(const data_map &data, int &size, int &dimensions, string ** data_title, float *** data_features){
+  void parse_data(const data_map &data, int &size, int &dimensions, string ** data_title, float *** data_features){
     vector<float> sample_map_data = data.begin()->second; 
     size = data.size();   
     dimensions = sample_map_data.size();
@@ -33,6 +36,7 @@ void parse_data(const data_map &data, int &size, int &dimensions, string ** data
     } 
 }
 
+//initializing using Forgy
 void init_clusters(int k, int size, int dimensions, float ** features, float ** cluster){
     srand(static_cast<unsigned int>(clock()));
     for (int i=0; i<k; i++){
@@ -55,6 +59,7 @@ int * find_clusters(int k, const data_map data, int max_iter) {
     string * data_title;
     float ** data_features;
     parse_data(data, data_size, data_dimensions, &data_title, &data_features);
+    cout << "parsing complete ..." << endl;
 
     cudaMallocManaged(&cluster_size, k*sizeof(int));
     cudaMallocManaged(&cluster_assignment, data_size*sizeof(int));
@@ -79,19 +84,29 @@ int * find_clusters(int k, const data_map data, int max_iter) {
 
     //make clusters
     init_clusters(k, data_size, data_dimensions,data_features, cluster);
-    update_cluster_assignment<<<numBlocks ,blockSize>>>(k, cluster_assignment, cluster_size, cluster, data_size, data_dimensions, data_features);
+    cout << "Initialized cluster " << endl;
+
+    update_cluster_assignment<<<numBlocks ,blockSize>>>(k, cluster_assignment, cluster, data_size, data_dimensions, data_features);
     cudaDeviceSynchronize();    
-
+    cout << "Updated assignment " << endl;
     calculate_cluster_size(k, cluster_assignment, data_size, cluster_size); 
-
+ 
     for (int i=0; i < max_iter; i++) {
+        int iter =0;
+        cout << "iteration :: " << iter++ << endl;
+
         update_clusters<<<numBlocks ,blockSize>>>(k, cluster, cluster_assignment, data_size, data_dimensions, data_features, cluster_size, did_change);
         cudaDeviceSynchronize();
+        cout << "iter: updated cluster " << endl;
 
         if (did_change[0] == 1){
             // update_cluster_assignment(k, cluster_assignment, cluster_size, cluster, data);
-            update_cluster_assignment<<<numBlocks ,blockSize>>>(k, cluster_assignment, cluster_size, cluster, data_size, data_dimensions, data_features);
+            update_cluster_assignment<<<numBlocks ,blockSize>>>(k, cluster_assignment, cluster, data_size, data_dimensions, data_features);
             cudaDeviceSynchronize();
+            calculate_cluster_size(k, cluster_assignment, data_size, cluster_size); 
+
+            cout << "iter: updated assignment " << endl;
+
                 }
         else{    
             print_cluster_size(k, cluster_assignment,data_size);
