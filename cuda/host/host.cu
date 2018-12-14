@@ -9,8 +9,7 @@ using namespace std;
 void calculate_cluster_size(int k, int *cluster_assignment,int n, int * cluster_size){
     for (int i=0; i<k; i++)
       cluster_size[i] = 0;
-    for (int i=0; i<n
-        ; i++){
+    for (int i=0; i<n; i++){
       cluster_size[cluster_assignment[i]]++;
     }
   }
@@ -90,29 +89,33 @@ int * find_clusters(int k, const data_map data, int max_iter) {
     cudaDeviceSynchronize();    
     cout << "Updated assignment " << endl;
     calculate_cluster_size(k, cluster_assignment, data_size, cluster_size); 
- 
+
+    int iter =0;
+
     for (int i=0; i < max_iter; i++) {
-        int iter =0;
         cout << "iteration :: " << iter++ << endl;
 
         update_clusters<<<numBlocks ,blockSize>>>(k, cluster, cluster_assignment, data_size, data_dimensions, data_features, cluster_size, did_change);
         cudaDeviceSynchronize();
+
         cout << "iter: updated cluster " << endl;
+        print_cluster_size(k, cluster_assignment,data_size);
 
         if (did_change[0] == 1){
             // update_cluster_assignment(k, cluster_assignment, cluster_size, cluster, data);
             update_cluster_assignment<<<numBlocks ,blockSize>>>(k, cluster_assignment, cluster, data_size, data_dimensions, data_features);
             cudaDeviceSynchronize();
+
             calculate_cluster_size(k, cluster_assignment, data_size, cluster_size); 
 
             cout << "iter: updated assignment " << endl;
 
-                }
+            }
         else{    
             print_cluster_size(k, cluster_assignment,data_size);
             return cluster_assignment;
         }
-            }
+    }
 
     print_cluster_size(k, cluster_assignment,data_size);
     return cluster_assignment;

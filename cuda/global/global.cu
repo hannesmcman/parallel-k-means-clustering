@@ -77,8 +77,7 @@ void update_cluster_assignment(int k, int * cluster_assignment, float ** cluster
 
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
-    
-    printf("in update, i : %d, s : %d \n", index, stride);
+
     for (int i=index; i<size; i+=stride){
         cluster_assignment[i] = find_nearest_center(k, features[i], dimension, cluster);
     }

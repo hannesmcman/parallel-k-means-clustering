@@ -9,6 +9,6 @@ int main(){
   data_map data = read_csv("../datasets/College.csv");
 
   int k = 10; 
-  int * cluster = find_clusters(k, data, 1);
+  int * cluster = find_clusters(k, data, 100);
 
 }
