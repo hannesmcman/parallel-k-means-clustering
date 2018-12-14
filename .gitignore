@@ -1,1 +1,9 @@
 bin/
+sequential/main0.cpp
+sequential/main
+sequential/.DS_Store
+cuda/sequential/read_csv.o
+cuda/sequential/main.o
+cuda/sequential/main
+.vscode/settings.json
+.DS_Store

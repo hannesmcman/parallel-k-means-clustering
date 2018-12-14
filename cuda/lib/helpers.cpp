@@ -34,27 +34,33 @@ centroid_vector gen_random_centroids(int k, int numFeatures, vector<float> min, 
   return centroids;
 }
 
-college_dataset fill_college_struct(const data_map& college_data){
 
-  vector<float> sample_map_data = college_data.begin()->second; 
-
-  college_dataset data;
-  data.size = college_data.size();
-  data.dimensions = sample_map_data.size();
-  data.names = new string[data.size];
-  data.features = new float *[data.size];
-  for (int i=0; i<data.size; i++)
-    data.features[i] = new float[data.dimensions];
-
-  int index = 0;
-  for (data_map::const_iterator it = college_data.begin(); it != college_data.end(); it++) {
-      data.names[index] = it->first;
-      for (int j=0; j<data.dimensions; j++)
-        data.features[index][j] = (it->second)[j];
-      index++;
-  } 
-  return data;
+void print_cluster(int k, int *cluster_assignment,int n,const college_dataset& data){
+  vector<int> ret[k];
+  for (int i=0; i<n; i++){
+    ret[cluster_assignment[i]].push_back(i);
+  }
+  for (int i=0; i<k; i++){
+    cout << i << " ::: ";
+    for (int j=0; j<ret[i].size(); j++)
+      cout << data.names[ret[i][j]] << ", ";
+    cout << endl << endl;
+  }
 }
+
+void print_cluster_size(int k, int *cluster_assignment,int n){
+    int size[k];
+    for (int i=0; i<k; i++)
+      size[i] = 0;
+    for (int i=0; i<n; i++){
+      size[cluster_assignment[i]]++;
+    }
+    for (int i=0; i<k; i++){
+      cout << i << " ::: " << size[i] << endl;
+    }
+  }
+
+
 
 float euclidean_distance_array(const float * x,const float * y, int n) {
   float sum = 0;

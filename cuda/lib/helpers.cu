@@ -25,5 +25,3 @@ void print_cluster(int k, int *cluster_assignment,int n,const college_dataset& d
       cout << i << " ::: " << size[i] << endl;
     }
   }
-
-  
